@@ -4,9 +4,29 @@ const { BadRequestError, NotFoundError } = require("../errors");
 
 
 const getAllJobs = async (req, res) => {
-  const jobs = await Job.find ( {createdBy:req.user.userId} ).sort('createdAt')
-  res.status(StatusCodes.OK).json({ jobs, count: jobs.length });
+  const { page = 1, limit = 10 } = req.query;
+
+  const queryObject = {
+    createdBy: req.user.userId,
+  };
+
+  const skip = (Number(page) - 1) * Number(limit);
+
+  const jobs = await Job.find(queryObject)
+    .sort("-createdAt")
+    .skip(skip)
+    .limit(Number(limit));
+
+  const totalJobs = await Job.countDocuments(queryObject);
+  const numOfPages = Math.ceil(totalJobs / Number(limit));
+
+  res.status(StatusCodes.OK).json({
+    jobs,
+    totalJobs,
+    numOfPages,
+  });
 };
+
 
 const getJob = async (req, res) => {
   const {user: { userId }, params: { id: jobId } } = req;
@@ -40,9 +60,10 @@ const updateJob = async (req, res) => {
   
 const job = await Job.findOneAndUpdate(
     { _id: jobId, createdBy: userId },
-    req.body,
+    { company, position },
     { new: true, runValidators: true }
   );
+
   if (!job) {
     throw new NotFoundError(`No job with id ${jobId}`);
   }
