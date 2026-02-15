@@ -47,8 +47,8 @@ export const handleJobs = () => {
     const data = await response.json();
 
     if (response.status === 200) {
-      message.textContent = data.msg;   // "The entry was deleted."
-      showJobs(); // refresh list
+      message.textContent = data.msg;
+      showJobs(); 
     } else {
       message.textContent = data.msg;
     }
@@ -63,7 +63,7 @@ export const handleJobs = () => {
 
     }
   });
-}; // ✅ closes handleJobs
+}; 
 
 export const showJobs = async () => {
   try {
@@ -81,7 +81,7 @@ export const showJobs = async () => {
     let children = [jobsTableHeader];
 
     if (response.status === 200) {
-      if (data.count === 0) {
+      if (data.totalJobs === 0) {
         jobsTable.replaceChildren(...children);
       } else {
         for (let i = 0; i < data.jobs.length; i++) {
@@ -94,7 +94,8 @@ export const showJobs = async () => {
             <td>${data.jobs[i].company}</td>
             <td>${data.jobs[i].position}</td>
             <td>${data.jobs[i].status}</td>
-            <div>${editButton}${deleteButton}</div>`;
+            ${editButton}
+            ${deleteButton}`;
 
           rowEntry.innerHTML = rowHTML;
           children.push(rowEntry);
